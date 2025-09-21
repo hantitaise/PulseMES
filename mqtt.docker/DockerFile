@@ -1,0 +1,56 @@
+# -------------------------------------------------
+# 1️⃣ Base image – Debian 12 (bookworm)
+# -------------------------------------------------
+FROM debian:12-slim AS base
+
+# -------------------------------------------------
+# 2️⃣ Install required packages
+# -------------------------------------------------
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        mosquitto mosquitto-clients \
+        python3 python3-pip \
+        nginx \
+        openssl \
+        ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# -------------------------------------------------
+# 3️⃣ Create application directory
+# -------------------------------------------------
+WORKDIR /app
+COPY ./src/app/ /app/
+# (any Python code you want to run can be placed in ./app on the host)
+
+# -------------------------------------------------
+# 4️⃣ Mosquitto configuration
+# -------------------------------------------------
+RUN mkdir -p /etc/mosquitto/conf.d
+
+# 1883 – plain MQTT
+COPY mosquitto-1883.conf /etc/mosquitto/conf.d/mosquitto-1883.conf
+
+# 8883 – MQTT over TLS + WebSocket TLS
+COPY ./src/conf/mosquitto-8883.conf /etc/mosquitto/conf.d/mosquitto-8883.conf
+COPY ./src/certs/mosquitto.pem /etc/mosquitto/certs/mosquitto.pem
+COPY ./src/certs/mosquitto.key /etc/mosquitto/certs/mosquitto.key
+
+# -------------------------------------------------
+# 5️⃣ NGINX configuration (reverse‑proxy)
+# -------------------------------------------------
+RUN mkdir -p /etc/nginx/conf.d
+COPY ./src/conf/nginx.conf /etc/nginx/nginx.conf
+COPY ./src/html/ /usr/share/nginx/html/
+
+# -------------------------------------------------
+# 6️⃣ Expose ports
+# -------------------------------------------------
+EXPOSE 1883 8883 80
+
+# -------------------------------------------------
+# 7️⃣ Startup script
+# -------------------------------------------------
+COPY ./src/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
