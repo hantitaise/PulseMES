@@ -23,17 +23,26 @@ COPY ./src/app/ /app/
 # (any Python code you want to run can be placed in ./app on the host)
 
 # -------------------------------------------------
+# 4️⃣ Certificate configuration
+# -------------------------------------------------
+
+COPY ./src/certs/ca.pem /etc/mosquitto/certs/ca.pem
+COPY ./src/certs/mosquitto.pem /etc/mosquitto/certs/mosquitto.pem
+COPY ./src/certs/mosquitto.key /etc/mosquitto/certs/mosquitto.key
+
+# -------------------------------------------------
 # 4️⃣ Mosquitto configuration
 # -------------------------------------------------
 RUN mkdir -p /etc/mosquitto/conf.d
 
 # 1883 – plain MQTT
-COPY mosquitto-1883.conf /etc/mosquitto/conf.d/mosquitto-1883.conf
+COPY ./src/conf/mosquitto-1883.conf /etc/mosquitto/conf.d/mosquitto-1883.conf
 
-# 8883 – MQTT over TLS + WebSocket TLS
+# 8883 – MQTT over TLS
 COPY ./src/conf/mosquitto-8883.conf /etc/mosquitto/conf.d/mosquitto-8883.conf
-COPY ./src/certs/mosquitto.pem /etc/mosquitto/certs/mosquitto.pem
-COPY ./src/certs/mosquitto.key /etc/mosquitto/certs/mosquitto.key
+# 9011 – Websocket TLS 
+COPY ./src/conf/mosquitto-8883.conf /etc/mosquitto/conf.d/mosquitto-9001.conf
+
 
 # -------------------------------------------------
 # 5️⃣ NGINX configuration (reverse‑proxy)

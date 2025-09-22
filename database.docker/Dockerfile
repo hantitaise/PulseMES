@@ -1,9 +1,8 @@
 # Image de base contenant PostgreSQL 17 et l’extension TimescaleDB
-FROM timescale/timescaledb:2.15.2-pg17
+FROM timescale/timescaledb:2.18.0-pg17
 
 # Variables d’environnement – mot de passe du super‑utilisateur postgres
 ENV POSTGRES_USER=postgres
-ENV POSTGRES_PASSWORD=MyStrongPassword123
 ENV POSTGRES_DB=main_db
 
 # Copie des scripts d’initialisation (exécutés automatiquement au premier démarrage)

@@ -1,0 +1,5 @@
+# 1️⃣ Build the image
+docker build -t pulse_mes_spv .
+
+# 2️⃣ Run a container
+docker run -d   -p 1883:1883   -p 8883:8883   -p 80:80  --name pulse_mes_spv 
